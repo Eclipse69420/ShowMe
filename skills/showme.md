@@ -113,6 +113,16 @@ Each annotation has:
 - Click page thumbnail to switch pages
 - Each page has its own annotations and undo history
 
+### Zoom & Pan
+
+- **Ctrl + +** - Zoom in
+- **Ctrl + -** - Zoom out
+- **Ctrl + 0** - Reset zoom and pan
+- **Ctrl + Wheel** - Zoom with mouse wheel
+- **Space + Drag** - Pan canvas
+- **Middle Mouse + Drag** - Pan canvas
+- Toolbar buttons: Zoom in, Zoom out, Fit to screen, Reset
+
 ### Actions
 
 - **Ctrl+V** - Paste screenshot
