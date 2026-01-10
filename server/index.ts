@@ -269,10 +269,13 @@ async function main() {
 
       // API endpoints
       if (url.pathname === "/api/submit" && req.method === "POST") {
+        console.error("[ShowMe] Received submit request");
         let rawPayload: unknown;
         try {
           rawPayload = await req.json();
-        } catch {
+          console.error("[ShowMe] Parsed JSON payload");
+        } catch (e) {
+          console.error("[ShowMe] JSON parse error:", e);
           return new Response(JSON.stringify({ error: "Invalid JSON" }), {
             status: 400,
             headers: { "Content-Type": "application/json" },
@@ -280,6 +283,7 @@ async function main() {
         }
 
         if (!validateSubmitPayload(rawPayload)) {
+          console.error("[ShowMe] Payload validation failed");
           return new Response(
             JSON.stringify({ error: "Invalid payload structure" }),
             {
@@ -288,6 +292,7 @@ async function main() {
             },
           );
         }
+        console.error("[ShowMe] Payload validated, resolving promise");
 
         const payload = rawPayload;
 
@@ -372,13 +377,18 @@ async function main() {
   console.error(`ShowMe canvas opened at ${browserUrl}`);
 
   // Wait for result
+  console.error("[ShowMe] Waiting for user action...");
   const result = await resultPromise;
+  console.error("[ShowMe] Got result, stopping server...");
 
   // Stop server
   server.stop();
 
   // Output result to stdout for Claude
   console.log(JSON.stringify(result));
+
+  // Force exit to ensure process terminates
+  process.exit(0);
 }
 
 function getContentType(path: string): string {
