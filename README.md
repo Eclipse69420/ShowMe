@@ -181,29 +181,24 @@ ShowMe integrates with Claude Code as a hook/skill. When invoked via `/showme`:
 
 ### Keyboard Shortcuts
 
-**Drawing Tools:**
+**Zoom & Pan:**
 
-- `P` - Pen
-- `R` - Rectangle
-- `C` - Circle
-- `A` - Arrow
-- `T` - Text
-- `E` - Eraser
-
-**Annotation Tools:**
-
-- `M` - Toggle annotation mode
-- `1` - Pin annotation
-- `2` - Area annotation
-- `3` - Arrow annotation
-- `4` - Highlight annotation
+- `Ctrl + +` - Zoom in
+- `Ctrl + -` - Zoom out
+- `Ctrl + 0` - Reset zoom and pan
+- `Ctrl + Wheel` - Zoom with mouse scroll
+- `Space + Drag` - Pan canvas
+- `Middle Mouse + Drag` - Pan canvas
 
 **Actions:**
 
 - `Ctrl+Z` - Undo
 - `Ctrl+Y` / `Ctrl+Shift+Z` - Redo
+- `Ctrl+V` - Paste screenshot from clipboard
 - `Delete` / `Backspace` - Delete selected annotation
 - `Escape` - Deselect / close popover
+
+_Note: Tool selection shortcuts removed to prevent conflicts when typing feedback. Use the toolbar buttons instead._
 
 ### Workflow
 
@@ -314,3 +309,9 @@ MIT
 **Stop describing. Start showing.**
 
 `/showme`
+
+---
+
+Built with ❤️ by **Yaron - No Fluff**
+
+[YouTube](https://www.youtube.com/channel/UCuCwMz8aMJBFfhDnYicfdjg/)

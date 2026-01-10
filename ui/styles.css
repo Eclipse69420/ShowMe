@@ -628,6 +628,31 @@ body {
   background: #ff6b6b;
 }
 
+.send-btn:disabled {
+  background: #666;
+  cursor: not-allowed;
+}
+
+/* Attribution Footer */
+.attribution {
+  text-align: center;
+  padding: 8px 16px;
+  font-size: 12px;
+  color: #666;
+  background: #0f0f1a;
+  border-top: 1px solid #0f3460;
+}
+
+.attribution a {
+  color: #e94560;
+  text-decoration: none;
+  margin-left: 8px;
+}
+
+.attribution a:hover {
+  text-decoration: underline;
+}
+
 /* ============================================
    MODALS
    ============================================ */

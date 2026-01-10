@@ -1654,17 +1654,25 @@ class ShowMeCanvas {
   // ============================================
 
   private onKeyDown(e: KeyboardEvent): void {
-    if (
+    const isTyping =
       e.target instanceof HTMLInputElement ||
-      e.target instanceof HTMLTextAreaElement
-    ) {
-      if (e.key === "Escape") {
-        this.hideTextModal();
-        this.hidePopover();
-      }
+      e.target instanceof HTMLTextAreaElement;
+
+    // Always allow Escape to close modals
+    if (e.key === "Escape") {
+      this.hideTextModal();
+      this.hidePopover();
+      this.selectedAnnotationId = null;
+      this.renderAnnotations();
       return;
     }
 
+    // Block all other shortcuts when typing in text fields
+    if (isTyping) {
+      return;
+    }
+
+    // Ctrl/Cmd shortcuts (undo, redo, zoom)
     if (e.ctrlKey || e.metaKey) {
       if (e.key === "z") {
         e.preventDefault();
@@ -1686,61 +1694,29 @@ class ShowMeCanvas {
         e.preventDefault();
         this.zoomReset();
       }
-    } else if (e.key === " " && !this.spaceHeld) {
+      return;
+    }
+
+    // Space for panning (only when not typing)
+    if (e.key === " " && !this.spaceHeld) {
       e.preventDefault();
       this.spaceHeld = true;
       if (this.canvasWrapper) {
         this.canvasWrapper.style.cursor = "grab";
       }
-    } else {
-      switch (e.key.toLowerCase()) {
-        case "p":
-          this.setTool("pen");
-          break;
-        case "r":
-          this.setTool("rect");
-          break;
-        case "c":
-          this.setTool("circle");
-          break;
-        case "a":
-          this.setTool("arrow");
-          break;
-        case "t":
-          this.setTool("text");
-          break;
-        case "e":
-          this.setTool("eraser");
-          break;
-        case "m":
-          this.toggleAnnotationMode();
-          break;
-        case "1":
-          this.setAnnotationTool("pin");
-          break;
-        case "2":
-          this.setAnnotationTool("area");
-          break;
-        case "3":
-          this.setAnnotationTool("arrow");
-          break;
-        case "4":
-          this.setAnnotationTool("highlight");
-          break;
-        case "delete":
-        case "backspace":
-          if (this.selectedAnnotationId) {
-            this.deleteAnnotation(this.selectedAnnotationId);
-          }
-          break;
-        case "escape":
-          this.hideTextModal();
-          this.hidePopover();
-          this.selectedAnnotationId = null;
-          this.renderAnnotations();
-          break;
-      }
+      return;
     }
+
+    // Delete selected annotation
+    if (e.key === "Delete" || e.key === "Backspace") {
+      if (this.selectedAnnotationId) {
+        this.deleteAnnotation(this.selectedAnnotationId);
+      }
+      return;
+    }
+
+    // Note: Tool shortcuts (P, R, C, A, T, E, M, 1-4) removed
+    // to prevent interference when typing. Use toolbar buttons instead.
   }
 
   private onKeyUp(e: KeyboardEvent): void {

@@ -90,22 +90,11 @@ Each annotation has:
 
 ## User Instructions
 
-### Drawing Tools
+### Tools (use toolbar buttons)
 
-- **P** - Pen (free draw)
-- **R** - Rectangle
-- **C** - Circle
-- **A** - Arrow
-- **T** - Text labels
-- **E** - Eraser
+**Drawing:** Pen, Rectangle, Circle, Arrow, Text, Eraser
 
-### Annotation Tools
-
-- **M** - Toggle annotation mode
-- **1** - Pin (numbered markers)
-- **2** - Area (selection rectangles)
-- **3** - Arrow (directional pointers)
-- **4** - Highlight (freehand highlighting)
+**Annotations:** Pin, Area, Arrow, Highlight
 
 ### Page Management
 
@@ -115,15 +104,11 @@ Each annotation has:
 
 ### Zoom & Pan
 
-- **Ctrl + +** - Zoom in
-- **Ctrl + -** - Zoom out
-- **Ctrl + 0** - Reset zoom and pan
 - **Ctrl + Wheel** - Zoom with mouse wheel
 - **Space + Drag** - Pan canvas
-- **Middle Mouse + Drag** - Pan canvas
-- Toolbar buttons: Zoom in, Zoom out, Fit to screen, Reset
+- Toolbar buttons: Zoom in, Zoom out, Fit, Reset
 
-### Actions
+### Keyboard Shortcuts
 
 - **Ctrl+V** - Paste screenshot
 - **Ctrl+Z** - Undo
