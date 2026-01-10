@@ -163,21 +163,21 @@
     </div>
 
     <!-- Text Input Modal -->
-    <div id="text-input-modal" class="modal hidden">
+    <div id="text-input-modal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Enter text">
       <div class="modal-content">
-        <input type="text" id="text-input" placeholder="Enter text..." />
+        <input type="text" id="text-input" placeholder="Enter text..." aria-label="Text to add to canvas" />
         <button id="text-submit">Add</button>
       </div>
     </div>
 
     <!-- Feedback Popover -->
-    <div id="feedback-popover" class="feedback-popover hidden">
+    <div id="feedback-popover" class="feedback-popover hidden" role="dialog" aria-modal="true" aria-labelledby="popover-title-text">
       <div class="popover-content">
         <div class="popover-header">
-          <span class="popover-title">Annotation Feedback</span>
-          <button id="popover-close" class="popover-close">&times;</button>
+          <span id="popover-title-text" class="popover-title">Annotation Feedback</span>
+          <button id="popover-close" class="popover-close" aria-label="Close feedback dialog">&times;</button>
         </div>
-        <textarea id="popover-feedback" class="popover-textarea" placeholder="Add feedback for this annotation..." rows="3"></textarea>
+        <textarea id="popover-feedback" class="popover-textarea" placeholder="Add feedback for this annotation..." rows="3" aria-label="Feedback text"></textarea>
         <div class="popover-footer">
           <span class="popover-hint">Escape to close</span>
           <button id="popover-save" class="popover-save-btn">Save</button>

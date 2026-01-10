@@ -2,6 +2,31 @@ import { spawn } from "child_process";
 import { existsSync } from "fs";
 import { join, resolve } from "path";
 
+// Auto-build if dist doesn't exist
+async function ensureBuild(): Promise<void> {
+  const projectRoot = join(import.meta.dir, "..");
+  const distIndex = join(projectRoot, "dist", "index.html");
+
+  if (!existsSync(distIndex)) {
+    console.error("Building UI (first run)...");
+
+    const exitCode = await new Promise<number>((resolve, reject) => {
+      const child = spawn("bun", ["run", "build"], {
+        cwd: projectRoot,
+        stdio: "inherit",
+      });
+
+      child.on("error", reject);
+      child.on("close", (code) => resolve(code ?? 1));
+    });
+
+    if (exitCode !== 0) {
+      throw new Error("Build failed");
+    }
+    console.error("Build complete.");
+  }
+}
+
 interface InputContext {
   tool_input?: {
     context?: string;
@@ -39,6 +64,24 @@ interface SubmitPayload {
   globalNotes?: string;
 }
 
+function validateSubmitPayload(data: unknown): data is SubmitPayload {
+  if (typeof data !== "object" || data === null) return false;
+  const payload = data as Record<string, unknown>;
+  if (payload.action !== "submit") return false;
+  if (!Array.isArray(payload.pages)) return false;
+
+  for (const page of payload.pages) {
+    if (typeof page !== "object" || page === null) return false;
+    const p = page as Record<string, unknown>;
+    if (typeof p.id !== "string" || typeof p.name !== "string") return false;
+    if (typeof p.image !== "string") return false;
+    if (typeof p.width !== "number" || typeof p.height !== "number")
+      return false;
+    if (!Array.isArray(p.annotations)) return false;
+  }
+  return true;
+}
+
 interface ShowMeOutput {
   hookSpecificOutput: {
     decision: {
@@ -62,22 +105,42 @@ async function readStdin(): Promise<InputContext> {
   }
 
   return new Promise((resolve) => {
-    process.stdin.on("data", (chunk) => chunks.push(chunk));
-    process.stdin.on("end", () => {
+    let resolved = false;
+
+    const cleanup = () => {
+      process.stdin.removeListener("data", onData);
+      process.stdin.removeListener("end", onEnd);
+      process.stdin.removeListener("error", onError);
+      clearTimeout(timeoutId);
+    };
+
+    const doResolve = (value: InputContext) => {
+      if (resolved) return;
+      resolved = true;
+      cleanup();
+      resolve(value);
+    };
+
+    const onData = (chunk: Buffer) => chunks.push(chunk);
+    const onEnd = () => {
       const input = Buffer.concat(chunks).toString("utf-8").trim();
       if (input) {
         try {
-          resolve(JSON.parse(input));
+          doResolve(JSON.parse(input));
         } catch {
-          resolve({});
+          doResolve({});
         }
       } else {
-        resolve({});
+        doResolve({});
       }
-    });
+    };
+    const onError = () => doResolve({});
 
-    // Timeout after 100ms if no input
-    setTimeout(() => resolve({}), 100);
+    process.stdin.on("data", onData);
+    process.stdin.on("end", onEnd);
+    process.stdin.on("error", onError);
+
+    const timeoutId = setTimeout(() => doResolve({}), 100);
   });
 }
 
@@ -127,6 +190,9 @@ function findDistDir(): string {
 }
 
 async function main() {
+  // Ensure UI is built before starting server
+  await ensureBuild();
+
   const context = await readStdin();
   const port = Math.floor(Math.random() * 10000) + 40000;
   const distDir = findDistDir();
@@ -143,7 +209,27 @@ async function main() {
 
       // API endpoints
       if (url.pathname === "/api/submit" && req.method === "POST") {
-        const payload: SubmitPayload = await req.json();
+        let rawPayload: unknown;
+        try {
+          rawPayload = await req.json();
+        } catch {
+          return new Response(JSON.stringify({ error: "Invalid JSON" }), {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+
+        if (!validateSubmitPayload(rawPayload)) {
+          return new Response(
+            JSON.stringify({ error: "Invalid payload structure" }),
+            {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
+        }
+
+        const payload = rawPayload;
 
         resolvePromise({
           hookSpecificOutput: {
@@ -181,9 +267,17 @@ async function main() {
         });
       }
 
-      // Serve static files
+      // Serve static files with path traversal protection
       let filePath = url.pathname === "/" ? "/index.html" : url.pathname;
-      const fullPath = join(distDir, filePath);
+      const decodedPath = decodeURIComponent(filePath);
+      const normalizedPath = resolve(distDir, "." + decodedPath);
+
+      // Prevent path traversal attacks
+      if (!normalizedPath.startsWith(resolve(distDir))) {
+        return new Response("Forbidden", { status: 403 });
+      }
+
+      const fullPath = normalizedPath;
 
       try {
         const file = Bun.file(fullPath);
@@ -193,8 +287,8 @@ async function main() {
             headers: { "Content-Type": contentType },
           });
         }
-      } catch {
-        // File not found
+      } catch (err) {
+        console.error(`Error serving file ${fullPath}:`, err);
       }
 
       // Fallback to index.html for SPA

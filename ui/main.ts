@@ -69,6 +69,12 @@ function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
+function escapeHtml(str: string): string {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 // ============================================
 // ANNOTATION RENDERER
 // ============================================
@@ -315,9 +321,11 @@ class HitTester {
       case "area":
         return true; // Already passed bounds
       case "arrow":
-        return this.onLine(point, ann.startPoint!, ann.endPoint!);
+        if (!ann.startPoint || !ann.endPoint) return false;
+        return this.onLine(point, ann.startPoint, ann.endPoint);
       case "highlight":
-        return this.onPath(point, ann.points!);
+        if (!ann.points || ann.points.length < 2) return false;
+        return this.onPath(point, ann.points);
       default:
         return false;
     }
@@ -410,6 +418,9 @@ class ShowMeCanvas {
 
   // Text modal
   private textPoint: Point = { x: 0, y: 0 };
+
+  // Resize debounce
+  private resizeTimeout: number | null = null;
 
   constructor() {
     this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -629,8 +640,16 @@ class ShowMeCanvas {
       }
     });
 
-    // Window resize
-    window.addEventListener("resize", () => this.handleResize());
+    // Window resize with debouncing
+    window.addEventListener("resize", () => {
+      if (this.resizeTimeout) {
+        clearTimeout(this.resizeTimeout);
+      }
+      this.resizeTimeout = window.setTimeout(() => {
+        this.handleResize();
+        this.resizeTimeout = null;
+      }, 150);
+    });
   }
 
   // ============================================
@@ -1205,9 +1224,13 @@ class ShowMeCanvas {
       this.saveState();
     }
 
-    // Restore annotation numbers
-    this.nextAnnotationNumber =
-      Math.max(1, ...page.annotations.map((a) => a.number)) + 1;
+    // Restore annotation numbers - handle empty array case
+    if (page.annotations.length === 0) {
+      this.nextAnnotationNumber = 1;
+    } else {
+      this.nextAnnotationNumber =
+        Math.max(...page.annotations.map((a) => a.number)) + 1;
+    }
 
     this.renderAnnotations();
     this.renderPageSidebar();
@@ -1251,7 +1274,7 @@ class ShowMeCanvas {
           <canvas class="thumbnail-canvas" width="120" height="80"></canvas>
         </div>
         <div class="page-info">
-          <span class="page-name">${page.name}</span>
+          <span class="page-name">${escapeHtml(page.name)}</span>
           <div class="page-actions">
             <button class="page-action-btn rename-btn" title="Rename">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1360,7 +1383,7 @@ class ShowMeCanvas {
           <span class="annotation-type">${typeLabel}</span>
           <button class="annotation-delete-btn" title="Delete">×</button>
         </div>
-        <textarea class="feedback-input" placeholder="Add feedback...">${ann.feedback}</textarea>
+        <textarea class="feedback-input" placeholder="Add feedback...">${escapeHtml(ann.feedback)}</textarea>
       `;
 
       // Click to select
@@ -1583,7 +1606,34 @@ class ShowMeCanvas {
   // SERVER COMMUNICATION
   // ============================================
 
+  private showError(message: string): void {
+    const existing = document.getElementById("error-toast");
+    if (existing) existing.remove();
+
+    const toast = document.createElement("div");
+    toast.id = "error-toast";
+    toast.className = "error-toast";
+    toast.setAttribute("role", "alert");
+    toast.innerHTML = `
+      <span class="error-message">${escapeHtml(message)}</span>
+      <button class="error-dismiss">&times;</button>
+    `;
+
+    toast.querySelector(".error-dismiss")!.addEventListener("click", () => {
+      toast.remove();
+    });
+
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 5000);
+  }
+
   private async sendToServer(): Promise<void> {
+    const sendBtn = document.getElementById("btn-send") as HTMLButtonElement;
+    const originalText = sendBtn.textContent;
+
+    sendBtn.disabled = true;
+    sendBtn.textContent = "Sending...";
+
     const globalNotes = (
       document.getElementById("notes") as HTMLTextAreaElement
     ).value;
@@ -1636,9 +1686,15 @@ class ShowMeCanvas {
 
       if (response.ok) {
         window.close();
+      } else {
+        this.showError("Failed to send. Please try again.");
       }
     } catch (err) {
       console.error("Failed to send:", err);
+      this.showError("Network error. Please check your connection.");
+    } finally {
+      sendBtn.disabled = false;
+      sendBtn.textContent = originalText || "Send to Claude";
     }
   }
 
