@@ -20,15 +20,30 @@ The command will:
 
 ## Processing the Output
 
+**CRITICAL:**
+
+- DO NOT try to read the raw output file directly - it contains base64 images and will exceed token limits
+- ALWAYS use the extraction script below to process the output
+- The script saves images to `/tmp/` and prints a text summary
+
 **IMPORTANT:** The output may contain MULTIPLE pages. You MUST process ALL of them.
 
-Run this script to extract all pages and get a structured summary:
+The output file path will be in the tool result. Pass it to this script:
 
 ```bash
 python3 << 'EOF'
 import sys, json, base64
 
-data = json.load(sys.stdin)
+# Read from file path (first argument) or use the standard Claude Code output location
+output_file = sys.argv[1] if len(sys.argv) > 1 else None
+
+if output_file:
+    with open(output_file, 'r') as f:
+        # Read only first line (JSON data, ignore any trailing content)
+        data = json.loads(f.readline())
+else:
+    data = json.load(sys.stdin)
+
 showme = data.get('hookSpecificOutput', {}).get('showme', {})
 pages = showme.get('pages', [])
 global_notes = showme.get('globalNotes', '')
