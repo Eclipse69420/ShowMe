@@ -1097,6 +1097,17 @@ class ShowMeCanvas {
     this.renderAnnotations();
     this.renderFeedbackSidebar();
     this.saveState();
+
+    // Auto-focus the feedback input in sidebar for the new annotation
+    setTimeout(() => {
+      const item = document.querySelector(
+        `.annotation-item[data-annotation-id="${ann.id}"] .feedback-input`,
+      ) as HTMLTextAreaElement | null;
+      if (item) {
+        item.focus();
+        item.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    }, 50);
   }
 
   private calculatePathBounds(points: Point[]): BoundingBox {
