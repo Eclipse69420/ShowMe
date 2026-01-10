@@ -1490,17 +1490,18 @@ class ShowMeCanvas {
 
   private renderFeedbackSidebar(): void {
     const list = document.getElementById("annotations-list")!;
-    const empty = document.getElementById("empty-annotations")!;
+    const empty = document.getElementById("empty-annotations");
     const annotations = this.currentPage.annotations;
 
+    // Remove existing annotation items (but preserve empty state element)
+    list.querySelectorAll(".annotation-item").forEach((el) => el.remove());
+
     if (annotations.length === 0) {
-      empty.style.display = "flex";
-      list.querySelectorAll(".annotation-item").forEach((el) => el.remove());
+      if (empty) empty.style.display = "flex";
       return;
     }
 
-    empty.style.display = "none";
-    list.innerHTML = "";
+    if (empty) empty.style.display = "none";
 
     annotations.forEach((ann) => {
       const item = document.createElement("div");
@@ -1516,11 +1517,11 @@ class ShowMeCanvas {
 
       item.innerHTML = `
         <div class="annotation-header">
-          <span class="annotation-number">#${ann.number}</span>
+          <span class="annotation-number" title="Click to highlight on canvas">#${ann.number}</span>
           <span class="annotation-type">${typeLabel}</span>
-          <button class="annotation-delete-btn" title="Delete">×</button>
+          <button class="annotation-delete-btn" title="Delete annotation" aria-label="Delete annotation">×</button>
         </div>
-        <textarea class="feedback-input" placeholder="Add feedback...">${escapeHtml(ann.feedback)}</textarea>
+        <textarea class="feedback-input" placeholder="Click to add feedback for Claude..." aria-label="Feedback for annotation ${ann.number}">${escapeHtml(ann.feedback)}</textarea>
       `;
 
       // Click to select
