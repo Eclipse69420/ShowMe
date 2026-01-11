@@ -39,6 +39,7 @@ None of these solve the real problem: **giving Claude precise, component-level f
 ---
 
 ## Enter ShowMe
+[![Watch the video](https://img.youtube.com/vi/m8I8E6I5tcY/maxresdefault.jpg)](https://youtu.be/m8I8E6I5tcY)
 
 ShowMe is a visual mockup and annotation tool built specifically for Claude Code.
 
